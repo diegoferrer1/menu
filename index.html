@@ -35,6 +35,67 @@
         header.nav-hidden {
             transform: translate(-50%, -150%);
         }
+        /* Estilos para el modal del carrito */
+        .cart-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .cart-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .cart-modal {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .cart-modal-overlay.active .cart-modal {
+            transform: scale(1);
+        }
+
+        /* Keyframes para animaciones del carrito */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0) scale(1.1); }
+            20%, 80% { transform: translate3d(2px, 0, 0) scale(1.1); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0) scale(1.1); }
+            40%, 60% { transform: translate3d(4px, 0, 0) scale(1.1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+        }
+
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .bounce {
+            animation: bounce 0.5s ease;
+        }
+
+        /* Estilo para el botón después de agregar un item */
+        .add-to-cart-btn.added {
+            background-color: #45251A; /* esquina-brown */
+            transform: scale(0.9);
+        }
     </style>
 
     <!-- Configuración de colores personalizados de Tailwind -->
@@ -59,19 +120,18 @@
     <header class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-transform duration-300 ease-in-out">
         <div class="flex items-center gap-4 bg-esquina-light/80 backdrop-blur-xl rounded-full shadow-lg p-2 border border-white/20">
             <!-- Logo -->
-            <a href="" title="">
-                <img src="La Esquina Logo (1).png" alt="" class="h-10 w-auto">
+            <a href="https://www.laesquinard.com/" title="Volver al Inicio">
+                <img src="La Esquina Logo (1).png" alt="Logo La Esquina" class="h-10 w-auto">
             </a>
             
             <!-- Separador -->
             <div class="w-px h-6 bg-gray-300"></div>
     
             <!-- Botón Volver -->
-                    <a href="https://wa.me/18095391711" target="_blank" class="hover:text-esquina-orange transition duration-300">
-                        <i class="fab fa-whatsapp"></i>
-                    <span style="margin-right: 10px;">Realizar pedido</span>
-                    </a>
-
+            <a href="https://www.laesquinard.com/" class="flex items-center gap-2 text-esquina-dark hover:text-esquina-orange transition-colors duration-300 pr-2" title="Volver al Inicio">
+                <i class="fas fa-home"></i>
+                <span class="font-medium hidden sm:inline">Inicio</span>
+            </a>
         </div>
     </header>
 
@@ -81,220 +141,76 @@
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16 reveal">
                     <h1 class="text-5xl md:text-6xl font-extrabold text-esquina-brown">Nuestro Menú Completo</h1>
-                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">Una sinfonía de sabores esperando por ti.</p>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">Selecciona tus platos y haz tu pedido directamente por WhatsApp.</p>
                 </div>
 
                 <!-- Contenedor del Menú -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
                     
-                    <!-- Función para crear un item del menú -->
-                    <script>
-                        const menuItem = (name, price, description = '') => `
-                            <div class="flex justify-between items-baseline">
-                                <div>
-                                    <p class="font-bold text-lg text-esquina-dark">${name}</p>
-                                    ${description ? `<p class="text-sm text-gray-500">${description}</p>` : ''}
-                                </div>
-                                <p class="font-bold text-esquina-brown text-lg whitespace-nowrap ml-4">RD$${price}</p>
-                            </div>
-                        `;
-                    </script>
-
                     <!-- Categoría Pastas -->
                     <div class="reveal space-y-6">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Pastas</h3>
                         <div id="pastas-menu" class="space-y-6"></div>
-                        <script>
-                            const pastas = [
-                                { name: 'Pasta Pomodoro', price: '250' },
-                                { name: 'Pasta Bechamel', price: '250' },
-                                { name: 'Pasta de Pollo', price: '400' },
-                                { name: 'Pasta de Camarones', price: '550' },
-                                { name: 'Boloñesa', price: '450' },
-                            ];
-                            document.getElementById('pastas-menu').innerHTML = pastas.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Cortes Angus -->
                     <div class="reveal space-y-6" style="transition-delay: 0.1s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Cortes Angus</h3>
                         <div id="angus-menu" class="space-y-6"></div>
-                        <script>
-                            const angus = [
-                                { name: 'Churrasco', price: '990' },
-                                { name: 'Flap Meat 8 - 10 oz', price: '750' },
-                                { name: 'Picaña Angus 16 - 18 onzas', price: '1,100' },
-                            ];
-                            document.getElementById('angus-menu').innerHTML = angus.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Al Grill -->
                     <div class="reveal space-y-6" style="transition-delay: 0.2s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Al Grill</h3>
                         <div id="grill-menu" class="space-y-6"></div>
-                         <script>
-                            const grill = [
-                                { name: 'Salchichas Alemanas', price: '350' },
-                                { name: 'Pechugas a la Plancha', price: '390' },
-                                { name: 'Pechuga a la Cordon Bleu', price: '590' },
-                                { name: 'Chuletas a la Parrilla', price: '390' },
-                                { name: 'Filete de Cerdo', price: '500' },
-                                { name: 'Costillas a la Parrilla', price: '590' },
-                                { name: 'Mero a la Plancha', price: '390' },
-                                { name: 'Salmón a la Plancha', price: '650' },
-                                { name: 'Gambas al Ajillo', price: '750' },
-                                { name: 'Camarones al Grill', price: '500' },
-                                { name: 'Parrillada Mixta (2 pers.)', price: '950' },
-                                { name: 'Parrillada Mixta (3 pers.)', price: '1,400' },
-                                { name: 'Parrillada Mixta (4 pers.)', price: '1,900' },
-                                { name: 'Parrillada Mixta (5 pers.)', price: '2,350' },
-                                { name: 'Bandeja Criolla', price: '750' },
-                                { name: 'Longaniza Casera', price: '390' },
-                            ];
-                            document.getElementById('grill-menu').innerHTML = grill.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Entradas -->
                     <div class="reveal space-y-6">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Entradas</h3>
                         <div id="entradas-menu" class="space-y-6"></div>
-                         <script>
-                            const entradas = [
-                                { name: 'Patatas Bravas', price: '220' },
-                                { name: 'Servicio Croquetas Duende', price: '180' },
-                                { name: 'Servicio Croquetas Chorizo', price: '180' },
-                                { name: 'Servicio Croquetas Pollo', price: '180' },
-                                { name: 'Servicio Bastones de Mozzarella', price: '180' },
-                                { name: 'Servicio Croquetas Mixtas', price: '180' },
-                                { name: 'Servicio Catibias de Pollo', price: '180' },
-                                { name: 'Servicio Catibias de Queso', price: '180' },
-                                { name: 'Servicio Catibias de Chorizo', price: '180' },
-                                { name: 'Servicio Catibias Mixtas', price: '180' },
-                                { name: 'Servicio Flautas de Pollo', price: '210' },
-                                { name: 'Croquetas Duende', price: '40' },
-                                { name: 'Croquetas de Chorizo', price: '40' },
-                                { name: 'Croquetas de Pollo', price: '40' },
-                                { name: 'Flautas de Pollo', price: '70' },
-                                { name: 'Bastones de Mozzarella', price: '40' },
-                                { name: 'Lomo de cerdo a la sal', price: '195' },
-                            ];
-                            document.getElementById('entradas-menu').innerHTML = entradas.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Embutidos -->
                     <div class="reveal space-y-6" style="transition-delay: 0.1s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Embutidos</h3>
                         <div id="embutidos-menu" class="space-y-6"></div>
-                        <script>
-                            const embutidos = [
-                                { name: 'Tabla de Queso Manchego', price: '250' },
-                                { name: 'Tabla de Jamón Serrano', price: '290' },
-                                { name: 'Tabla de Embutidos', price: '305' },
-                                { name: 'Provoleta', price: '275' },
-                            ];
-                            document.getElementById('embutidos-menu').innerHTML = embutidos.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Acompañamientos -->
                     <div class="reveal space-y-6" style="transition-delay: 0.2s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Acompañamientos</h3>
                         <div id="acompanamientos-menu" class="space-y-6"></div>
-                        <script>
-                            const acompanamientos = [
-                                { name: 'Arroz Blanco & Habichuelas', price: '0' },
-                                { name: 'Pan Fresco', price: '0' },
-                                { name: 'Casabe', price: '0' },
-                                { name: 'Tostones', price: '0' },
-                                { name: 'Papas Wedge', price: '75' },
-                                { name: 'Papas Fritas', price: '0' },
-                                { name: 'Papas Salteadas', price: '110' },
-                                { name: 'Pure de Papas', price: '90' },
-                                { name: 'Pure de Rabanos', price: '120' },
-                                { name: 'Vegetales al Grill', price: '120' },
-                                { name: 'Bastones de Yuca', price: '75' },
-                            ];
-                            document.getElementById('acompanamientos-menu').innerHTML = acompanamientos.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
                     
                     <!-- Categoría Postres -->
                     <div class="reveal space-y-6">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Postres</h3>
                         <div id="postres-menu" class="space-y-6"></div>
-                        <script>
-                            const postres = [
-                                { name: 'Brownies', price: '90' },
-                                { name: 'Brownies a la Mode', price: '225' },
-                                { name: 'Cortado de leche', price: '160' },
-                                { name: 'Tarta de Queso Vasca', price: '195' },
-                            ];
-                            document.getElementById('postres-menu').innerHTML = postres.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Hamburguesas -->
                     <div class="reveal space-y-6" style="transition-delay: 0.1s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Hamburguesas</h3>
                         <div id="hamburguesas-menu" class="space-y-6"></div>
-                        <script>
-                            const hamburguesas = [
-                                { name: 'Angus 8 onzas', price: '390' },
-                                { name: 'Angus Bacon & Cheese', price: '450' },
-                                { name: 'Doble Angus Cheese', price: '800' },
-                                { name: 'Mar & Tierra', price: '650' },
-                                { name: 'Pollo', price: '350' },
-                            ];
-                            document.getElementById('hamburguesas-menu').innerHTML = hamburguesas.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Ensaladas, Wraps & Mas -->
                     <div class="reveal space-y-6" style="transition-delay: 0.2s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Ensaladas, Wraps &amp; Más</h3>
                         <div id="ensaladas-menu" class="space-y-6"></div>
-                        <script>
-                            const ensaladas = [
-                                { name: 'Ensalada Fresca', price: '140' },
-                                { name: 'Ensalada de Pollo', price: '350' },
-                                { name: 'Tortilla Española', price: '300' },
-                                { name: 'Wraps Angus', price: '350' },
-                                { name: 'Wraps Pollo', price: '350' },
-                                { name: 'Wraps de Camarones', price: '450' },
-                                { name: 'Wraps de Vegetales', price: '250' },
-                            ];
-                            document.getElementById('ensaladas-menu').innerHTML = ensaladas.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Mofongos -->
                     <div class="reveal space-y-6">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Mofongos</h3>
                         <div id="mofongos-menu" class="space-y-6"></div>
-                        <script>
-                            const mofongos = [
-                                { name: 'Mofongo', price: '390' },
-                                { name: 'Mofongo Mixto', price: '490' },
-                                { name: 'Mofongo de Camarones', price: '750' },
-                            ];
-                            document.getElementById('mofongos-menu').innerHTML = mofongos.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                     <!-- Categoría Caldos & Cremas -->
                     <div class="reveal space-y-6" style="transition-delay: 0.1s;">
                         <h3 class="text-3xl font-bold text-esquina-orange border-b-2 border-esquina-orange pb-3 mb-6">Caldos &amp; Cremas</h3>
                         <div id="caldos-menu" class="space-y-6"></div>
-                        <script>
-                            const caldos = [
-                                { name: 'Crema de Auyama', price: '220' },
-                            ];
-                            document.getElementById('caldos-menu').innerHTML = caldos.map(p => menuItem(p.name, p.price)).join('');
-                        </script>
                     </div>
 
                 </div>
@@ -302,6 +218,34 @@
         </section>
     </main>
     
+    <!-- ========== BOTÓN FLOTANTE DEL CARRITO ========== -->
+    <button id="cart-button" class="fixed bottom-6 right-6 bg-esquina-orange text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-2xl transform hover:scale-110 transition-transform duration-300">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count" class="absolute -top-1 -right-1 bg-esquina-brown text-white text-xs rounded-full w-6 h-6 flex items-center justify-center border-2 border-esquina-orange">0</span>
+    </button>
+
+    <!-- ========== MODAL DEL CARRITO ========== -->
+    <div id="cart-modal-overlay" class="cart-modal-overlay">
+        <div class="cart-modal">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-esquina-brown">Tu Pedido</h2>
+                <button id="close-cart-modal" class="text-2xl text-gray-500 hover:text-esquina-dark">&times;</button>
+            </div>
+            <div id="cart-items" class="mb-6 space-y-4">
+                <!-- Los items del carrito se insertarán aquí -->
+            </div>
+            <div class="border-t pt-4">
+                <div class="flex justify-between items-center text-xl font-bold">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-esquina-brown">RD$0</span>
+                </div>
+                <a id="whatsapp-checkout" href="#" target="_blank" class="block w-full text-center bg-green-500 text-white py-3 rounded-lg mt-6 font-semibold hover:bg-green-600 transition-colors">
+                    <i class="fab fa-whatsapp mr-2"></i>Finalizar Pedido por WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== FOOTER ========== -->
     <footer class="bg-esquina-brown text-esquina-light">
         <div class="container mx-auto px-6 py-8">
@@ -310,6 +254,8 @@
                 <div class="flex space-x-6 mt-4 md:mt-0">
                     <a href="https://www.instagram.com/laesquinard" target="_blank" class="text-xl hover:text-esquina-orange transition duration-300"><i class="fab fa-instagram"></i></a>
                     <a href="https://wa.me/18095391711" target="_blank" class="text-xl hover:text-esquina-orange transition duration-300"><i class="fab fa-whatsapp"></i></a>
+                                    <a href="#" class="text-xl hover:text-esquina-orange transition duration-300"><i class="fab fa-facebook-f"></i></a>
+
                 </div>
             </div>
         </div>
@@ -328,24 +274,161 @@
         }, {
             threshold: 0.1
         });
-
-        revealElements.forEach(el => {
-            observer.observe(el);
-        });
+        revealElements.forEach(el => observer.observe(el));
 
         // Lógica para ocultar/mostrar el header al hacer scroll
         const header = document.querySelector('header');
         let lastScrollY = window.scrollY;
-
         window.addEventListener('scroll', () => {
             if (lastScrollY < window.scrollY && window.scrollY > 100) {
-                // El usuario está deslizando hacia abajo
                 header.classList.add('nav-hidden');
             } else {
-                // El usuario está deslizando hacia arriba
                 header.classList.remove('nav-hidden');
             }
             lastScrollY = window.scrollY;
+        });
+
+        // ==================================================
+        // LÓGICA DEL CARRITO DE COMPRAS
+        // ==================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuData = {
+                pastas: [ { name: 'Pasta Pomodoro', price: 250 }, { name: 'Pasta Bechamel', price: 250 }, { name: 'Pasta de Pollo', price: 400 }, { name: 'Pasta de Camarones', price: 550 }, { name: 'Boloñesa', price: 450 } ],
+                angus: [ { name: 'Churrasco', price: 990 }, { name: 'Flap Meat 8 - 10 oz', price: 750 }, { name: 'Picaña Angus 16 - 18 onzas', price: 1100 } ],
+                grill: [ { name: 'Salchichas Alemanas', price: 350 }, { name: 'Pechugas a la Plancha', price: 390 }, { name: 'Pechuga a la Cordon Bleu', price: 590 }, { name: 'Chuletas a la Parrilla', price: 390 }, { name: 'Filete de Cerdo', price: 500 }, { name: 'Costillas a la Parrilla', price: 590 }, { name: 'Mero a la Plancha', price: 390 }, { name: 'Salmón a la Plancha', price: 650 }, { name: 'Gambas al Ajillo', price: 750 }, { name: 'Camarones al Grill', price: 500 }, { name: 'Parrillada Mixta (2 pers.)', price: 950 }, { name: 'Parrillada Mixta (3 pers.)', price: 1400 }, { name: 'Parrillada Mixta (4 pers.)', price: 1900 }, { name: 'Parrillada Mixta (5 pers.)', price: 2350 }, { name: 'Bandeja Criolla', price: 750 }, { name: 'Longaniza Casera', price: 390 } ],
+                entradas: [ { name: 'Patatas Bravas', price: 220 }, { name: 'Servicio Croquetas Duende', price: 180 }, { name: 'Servicio Croquetas Chorizo', price: 180 }, { name: 'Servicio Croquetas Pollo', price: 180 }, { name: 'Servicio Bastones de Mozzarella', price: 180 }, { name: 'Servicio Croquetas Mixtas', price: 180 }, { name: 'Servicio Catibias de Pollo', price: 180 }, { name: 'Servicio Catibias de Queso', price: 180 }, { name: 'Servicio Catibias de Chorizo', price: 180 }, { name: 'Servicio Catibias Mixtas', price: 180 }, { name: 'Servicio Flautas de Pollo', price: 210 }, { name: 'Croquetas Duende', price: 40 }, { name: 'Croquetas de Chorizo', price: 40 }, { name: 'Croquetas de Pollo', price: 40 }, { name: 'Flautas de Pollo', price: 70 }, { name: 'Bastones de Mozzarella', price: 40 }, { name: 'Lomo de cerdo a la sal', price: 195 } ],
+                embutidos: [ { name: 'Tabla de Queso Manchego', price: 250 }, { name: 'Tabla de Jamón Serrano', price: 290 }, { name: 'Tabla de Embutidos', price: 305 }, { name: 'Provoleta', price: 275 } ],
+                acompanamientos: [ { name: 'Arroz Blanco & Habichuelas', price: 0 }, { name: 'Pan Fresco', price: 0 }, { name: 'Casabe', price: 0 }, { name: 'Tostones', price: 0 }, { name: 'Papas Wedge', price: 75 }, { name: 'Papas Fritas', price: 0 }, { name: 'Papas Salteadas', price: 110 }, { name: 'Pure de Papas', price: 90 }, { name: 'Pure de Rabanos', price: 120 }, { name: 'Vegetales al Grill', price: 120 }, { name: 'Bastones de Yuca', price: 75 } ],
+                postres: [ { name: 'Brownies', price: 90 }, { name: 'Brownies a la Mode', price: 225 }, { name: 'Cortado de leche', price: 160 }, { name: 'Tarta de Queso Vasca', price: 195 } ],
+                hamburguesas: [ { name: 'Angus 8 onzas', price: 390 }, { name: 'Angus Bacon & Cheese', price: 450 }, { name: 'Doble Angus Cheese', price: 800 }, { name: 'Mar & Tierra', price: 650 }, { name: 'Pollo', price: 350 } ],
+                ensaladas: [ { name: 'Ensalada Fresca', price: 140 }, { name: 'Ensalada de Pollo', price: 350 }, { name: 'Tortilla Española', price: 300 }, { name: 'Wraps Angus', price: 350 }, { name: 'Wraps Pollo', price: 350 }, { name: 'Wraps de Camarones', price: 450 }, { name: 'Wraps de Vegetales', price: 250 } ],
+                mofongos: [ { name: 'Mofongo', price: 390 }, { name: 'Mofongo Mixto', price: 490 }, { name: 'Mofongo de Camarones', price: 750 } ],
+                caldos: [ { name: 'Crema de Auyama', price: 220 } ]
+            };
+
+            let cart = [];
+
+            const cartButton = document.getElementById('cart-button');
+            const cartCount = document.getElementById('cart-count');
+            const cartModalOverlay = document.getElementById('cart-modal-overlay');
+            const closeCartModalButton = document.getElementById('close-cart-modal');
+
+            // Función para renderizar el menú
+            const renderMenu = () => {
+                for (const category in menuData) {
+                    const container = document.getElementById(`${category}-menu`);
+                    if (container) {
+                        container.innerHTML = menuData[category].map(item => menuItem(item.name, item.price)).join('');
+                    }
+                }
+            };
+
+            // Función para crear un item del menú con botón
+            const menuItem = (name, price) => `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-lg text-esquina-dark">${name}</p>
+                        <p class="font-bold text-esquina-brown text-lg">RD$${price}</p>
+                    </div>
+                    <button class="add-to-cart-btn bg-esquina-orange text-white rounded-full w-10 h-10 text-xl font-bold hover:bg-esquina-brown transition-all duration-300" data-name="${name}" data-price="${price}">+</button>
+                </div>
+            `;
+
+            // Función para agregar al carrito
+            const addToCart = (name, price) => {
+                const existingItem = cart.find(item => item.name === name);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ name, price, quantity: 1 });
+                }
+                updateCart();
+
+                // Disparar animaciones del carrito
+                cartButton.classList.remove('shake');
+                cartCount.classList.remove('bounce');
+                void cartButton.offsetWidth; // Truco para reiniciar la animación
+                void cartCount.offsetWidth;
+                cartButton.classList.add('shake');
+                cartCount.classList.add('bounce');
+            };
+            
+            // Función para renderizar el carrito
+            const renderCart = () => {
+                const cartItemsContainer = document.getElementById('cart-items');
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-500">Tu carrito está vacío.</p>';
+                    return;
+                }
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-sm text-gray-600">RD$${item.price} x ${item.quantity}</p>
+                        </div>
+                        <div class="font-bold">RD$${item.price * item.quantity}</div>
+                    </div>
+                `).join('');
+            };
+
+            // Función para actualizar todo el carrito (UI y totales)
+            const updateCart = () => {
+                renderCart();
+                
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                document.getElementById('cart-total').textContent = `RD$${total}`;
+                
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCount.textContent = totalItems;
+
+                generateWhatsAppLink();
+            };
+
+            // Función para generar el enlace de WhatsApp
+            const generateWhatsAppLink = () => {
+                if (cart.length === 0) return;
+                const phoneNumber = "18095391711"; // Número de WhatsApp del negocio
+                let message = "¡Hola! Quisiera hacer el siguiente pedido:\n\n";
+                cart.forEach(item => {
+                    message += `*${item.quantity}x* - ${item.name}\n`;
+                });
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                message += `\n*Total a pagar: RD$${total}*`;
+                
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                document.getElementById('whatsapp-checkout').href = whatsappUrl;
+            };
+
+            // Event listener para los botones de "Agregar al carrito"
+            document.querySelector('main').addEventListener('click', (e) => {
+                const button = e.target.closest('.add-to-cart-btn');
+                if (button) {
+                    const name = button.dataset.name;
+                    const price = parseInt(button.dataset.price);
+                    addToCart(name, price);
+
+                    // Animación de feedback en el botón
+                    button.classList.add('added');
+                    button.innerHTML = '<i class="fas fa-check pointer-events-none"></i>';
+
+                    setTimeout(() => {
+                        button.classList.remove('added');
+                        button.innerHTML = '+';
+                    }, 1000);
+                }
+            });
+
+            // Abrir y cerrar el modal
+            cartButton.addEventListener('click', () => cartModalOverlay.classList.add('active'));
+            closeCartModalButton.addEventListener('click', () => cartModalOverlay.classList.remove('active'));
+            cartModalOverlay.addEventListener('click', (e) => {
+                if (e.target === cartModalOverlay) {
+                    cartModalOverlay.classList.remove('active');
+                }
+            });
+            
+            // Renderizar el menú inicial
+            renderMenu();
         });
     </script>
 
