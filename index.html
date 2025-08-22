@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Esquina RD - Sabor y Tradición en Constanza</title>
+    <title>Menú - La Esquina RD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
         /* Definición de la paleta de colores de la marca y estilos base */
         :root {
@@ -39,33 +41,91 @@
             opacity: 1;
             transform: translateY(0);
         }
-
-        /* Estilo para el botón flotante */
-        .floating-button {
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
         
-        /* Hero background */
-        .hero-bg {
-             background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('paella.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* Efecto Parallax */
+        /* Estilos para los modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* Keyframes para animaciones del carrito */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .bounce {
+            animation: bounce 0.5s ease;
+        }
+
+        /* Estilo para el botón después de agregar un item */
+        .add-to-cart-btn.added {
+            background-color: var(--color-secondary);
+            transform: scale(0.9);
+        }
+
+        /* Ocultar la barra de scroll para los anclajes del menú */
+        #menu-anchors::-webkit-scrollbar {
+            display: none;
+        }
+        #menu-anchors {
+            -ms-overflow-style: none;  /* IE y Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="bg-[var(--color-bg)] text-[var(--color-text)] overflow-x-hidden">
 
     <!-- Header y Navegación -->
     <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-3xl font-extrabold font-display" style="color: var(--color-secondary);">
-                <a href="#" class="hover:text-[var(--color-primary)] transition-colors duration-300">La Esquina</a>
-            </div>
+            <a href="index.html" class="text-3xl font-extrabold font-display" style="color: var(--color-secondary);">
+                La Esquina
+            </a>
             <div class="hidden md:flex items-center space-x-6">
-                <a href="menu.html" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Menú</a>
-                <a href="#galeria" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Galería</a>
-                <a href="#contacto" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Contacto</a>
+                <a href="index.html" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Inicio</a>
+                <a href="index.html#galeria" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Galería</a>
+                <a href="index.html#contacto" class="text-gray-700 hover:text-[var(--color-primary)] transition-colors duration-300">Contacto</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden text-gray-800">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,144 +135,163 @@
         </nav>
         <!-- Menú Móvil -->
         <div id="mobile-menu" class="hidden md:hidden bg-white p-4">
-            <a href="menu.html" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Menú</a>
-            <a href="#galeria" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Galería</a>
-            <a href="#contacto" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Contacto</a>
+            <a href="index.html" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Inicio</a>
+            <a href="index.html#galeria" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Galería</a>
+            <a href="index.html#contacto" class="block py-2 text-center text-gray-700 hover:bg-gray-100 rounded-lg">Contacto</a>
         </div>
     </header>
 
-    <!-- Sección Hero -->
-    <section class="hero-bg text-white min-h-screen flex items-center justify-center relative">
-        <div class="text-center p-6">
-            <h1 class="text-6xl md:text-8xl font-display font-extrabold mb-4 reveal">El Corazón de Constanza</h1>
-            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto reveal" style="transition-delay: 200ms;">Una experiencia culinaria que celebra los sabores auténticos de nuestra tierra.</p>
-            <div class="flex justify-center gap-4 reveal" style="transition-delay: 400ms;">
-                <a href="menu.html" class="bg-[var(--color-primary)] hover:bg-opacity-90 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">Descubre el Menú</a>
-                <a href="#contacto" class="bg-white/20 backdrop-blur-sm border border-white/50 hover:bg-white/30 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">Visítanos</a>
+    <main class="pt-16 md:pt-24">
+        <!-- ========== SECCIÓN MENÚ ========== -->
+        <section id="menu" class="pb-20 md:pb-28">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 reveal">
+                    <h1 id="menu-title" class="text-5xl md:text-7xl font-display font-extrabold" style="color: var(--color-secondary);">Nuestro Menú</h1>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">Selecciona tus platos y haz tu pedido directamente por WhatsApp.</p>
+                </div>
+                
+                <!-- Contenedor de Anclas del Menú con Flechas -->
+                <div class="sticky top-24 z-40 mb-12">
+                    <div class="relative">
+                        <button id="scroll-left" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full w-12 h-12 items-center justify-center shadow-lg hover:bg-gray-200 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <div id="menu-anchors" class="bg-white/80 backdrop-blur-lg rounded-full shadow-md flex flex-nowrap overflow-x-auto gap-4 p-2 mx-auto">
+                            <!-- Los botones de ancla se insertarán aquí por JS -->
+                        </div>
+                        <button id="scroll-right" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm rounded-full w-12 h-12 items-center justify-center shadow-lg hover:bg-gray-200 transition-colors">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Contenedor del Menú (se llenará con JS) -->
+                <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+                    <!-- Las categorías y platos se insertan aquí dinámicamente -->
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- ========== BOTÓN FLOTANTE DEL CARRITO ========== -->
+    <button id="cart-button" class="fixed bottom-6 right-6 bg-[var(--color-primary)] text-white w-20 h-20 rounded-full shadow-2xl flex items-center justify-center text-3xl transform hover:scale-110 transition-transform duration-300 z-40">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count" class="absolute -top-1 -right-1 bg-[var(--color-secondary)] text-white text-sm rounded-full w-8 h-8 flex items-center justify-center border-2 border-[var(--color-primary)]">0</span>
+    </button>
+
+    <!-- ========== MODAL DEL CARRITO ========== -->
+    <div id="cart-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-display font-bold" style="color: var(--color-secondary);">Tu Pedido</h2>
+                <button id="close-cart-modal" class="text-3xl text-gray-400 hover:text-gray-800 transition-colors">&times;</button>
+            </div>
+            <div id="cart-items" class="mb-6 space-y-4 max-h-64 overflow-y-auto pr-2">
+                <!-- Los items del carrito se insertarán aquí -->
+            </div>
+            <div class="border-t pt-4">
+                <div class="mb-4">
+                    <label for="order-comment" class="block text-sm font-bold mb-2">Añadir un comentario general (opcional):</label>
+                    <textarea id="order-comment" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]" rows="2" placeholder="Ej: Todo para llevar..."></textarea>
+                </div>
+                
+                <!-- Desglose de precios -->
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between items-center text-md">
+                        <span>Subtotal:</span>
+                        <span id="cart-subtotal">RD$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-md">
+                        <span>ITBIS (18%):</span>
+                        <span id="cart-tax">RD$0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center text-xl font-bold mb-6 border-t pt-2">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-[var(--color-secondary)]">RD$0.00</span>
+                </div>
+                <a id="whatsapp-checkout" href="#" target="_blank" class="block w-full text-center bg-green-500 text-white py-4 rounded-full font-semibold hover:bg-green-600 transition-colors text-lg">
+                    <i class="fab fa-whatsapp mr-2"></i>Finalizar por WhatsApp
+                </a>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Sección Menú Destacado -->
-    <section id="menu" class="py-20 md:py-32">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-5xl font-display font-bold reveal" style="color: var(--color-secondary);">Platos que Enamoran</h2>
-                <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto reveal" style="transition-delay: 200ms;">Una probada de nuestras creaciones más aclamadas.</p>
+    <!-- ========== MODAL DE OPCIONES DE CARNE ========== -->
+    <div id="options-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-display font-bold" style="color: var(--color-secondary);">Personaliza tu corte</h2>
+                <button id="close-options-modal" class="text-3xl text-gray-400 hover:text-gray-800 transition-colors">&times;</button>
             </div>
             
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Plato 1 -->
-                <div class="bg-white rounded-3xl shadow-lg overflow-hidden group reveal">
-                    <div class="overflow-hidden h-64">
-                        <img src="https://placehold.co/600x400/E29578/FFFFFF?text=Chivo+Guisa'o" alt="Imagen de un plato fuerte" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="p-8">
-                        <h3 class="text-3xl font-bold font-display mb-3" style="color: var(--color-secondary);">Chivo Guisa'o Estilo Constanza</h3>
-                        <p class="text-gray-600 mb-6">Tierno chivo cocido a fuego lento con especias locales y un toque secreto.</p>
-                        <span class="text-2xl font-semibold" style="color: var(--color-text);">RD$ 750</span>
-                    </div>
-                </div>
-                <!-- Plato 2 -->
-                <div class="bg-white rounded-3xl shadow-lg overflow-hidden group reveal" style="transition-delay: 200ms;">
-                    <div class="overflow-hidden h-64">
-                        <img src="https://placehold.co/600x400/83C5BE/FFFFFF?text=Pizzas+a+la+Le%C3%B1a" alt="Imagen de una pizza" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="p-8">
-                        <h3 class="text-3xl font-bold font-display mb-3" style="color: var(--color-secondary);">Pizzas a la Leña</h3>
-                        <p class="text-gray-600 mb-6">Masa artesanal y los ingredientes más frescos del valle, horneadas a la perfección.</p>
-                        <span class="text-2xl font-semibold" style="color: var(--color-text);">Desde RD$ 550</span>
+            <form id="meat-options-form">
+                <!-- Opciones de Término -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold mb-3">Término de la carne</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="block bg-gray-100 p-3 rounded-lg text-center"><input type="radio" name="termino" value="Rojo" class="mr-2" checked>Rojo / Rare</label></div>
+                        <div><label class="block bg-gray-100 p-3 rounded-lg text-center"><input type="radio" name="termino" value="Medio" class="mr-2">Medio / Medium</label></div>
+                        <div><label class="block bg-gray-100 p-3 rounded-lg text-center"><input type="radio" name="termino" value="Tres Cuartos" class="mr-2">Tres Cuartos</label></div>
+                        <div><label class="block bg-gray-100 p-3 rounded-lg text-center"><input type="radio" name="termino" value="Bien Cocido" class="mr-2">Bien Cocido</label></div>
                     </div>
                 </div>
-                <!-- Plato 3 -->
-                <div class="bg-white rounded-3xl shadow-lg overflow-hidden group reveal" style="transition-delay: 400ms;">
-                    <div class="overflow-hidden h-64">
-                        <img src="https://placehold.co/600x400/FFDDD2/333333?text=Mojito+de+Fresa" alt="Imagen de un cóctel" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="p-8">
-                        <h3 class="text-3xl font-bold font-display mb-3" style="color: var(--color-secondary);">Mojito de Fresa del Valle</h3>
-                        <p class="text-gray-600 mb-6">El cóctel de la casa, preparado con fresas frescas de los campos de Constanza.</p>
-                        <span class="text-2xl font-semibold" style="color: var(--color-text);">RD$ 350</span>
-                    </div>
-                </div>
-            </div>
-             <div class="text-center mt-16 reveal">
-                 <a href="menu.html" class="bg-gray-800 hover:bg-[var(--color-secondary)] text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">Ver Menú Completo</a>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Sección Galería -->
-    <section id="galeria" class="py-20 md:py-32 bg-white">
-        <div class="container mx-auto px-6">
-            <h2 class="text-5xl font-display font-bold text-center mb-16 reveal" style="color: var(--color-secondary);">Vive Momentos Mágicos</h2>
-            <div class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x700/FFA07A/FFFFFF?text=M%C3%BAsica" alt="Evento con música en vivo">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x500/778899/FFFFFF?text=San+Valent%C3%ADn" alt="Evento de San Valentín">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x800/4682B4/FFFFFF?text=Noche" alt="Pareja en una noche especial">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x500/20B2AA/FFFFFF?text=Aniversario" alt="Celebración de aniversario">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x700/CD5C5C/FFFFFF?text=Amigos" alt="Grupo de amigos disfrutando">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x500/B0C4DE/FFFFFF?text=Celebraci%C3%B3n" alt="Gente celebrando">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x800/8FBC8F/FFFFFF?text=Detalles" alt="Detalles del restaurante">
-                <img class="rounded-2xl shadow-md reveal" src="https://placehold.co/500x500/6A5ACD/FFFFFF?text=Brindis" alt="Personas brindando">
-            </div>
-            <div class="text-center mt-16 reveal">
-                <a href="#" class="bg-[var(--color-primary)] hover:bg-opacity-90 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">Ver más fotos</a>
-            </div>
-        </div>
-    </section>
 
-    <!-- Sección Contacto y Mapa -->
-    <section id="contacto" class="py-20 md:py-32">
-        <div class="container mx-auto px-6">
-            <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12 grid md:grid-cols-2 gap-12 items-center reveal">
-                <!-- Información -->
-                <div class="space-y-8">
-                    <div>
-                        <h2 class="text-5xl font-display font-bold mb-6" style="color: var(--color-secondary);">Te Esperamos</h2>
-                        <p class="text-lg text-gray-600">Estamos en el corazón de Constanza, listos para recibirte. ¡Ven a visitarnos!</p>
-                    </div>
-                    <div class="space-y-4">
-                        <p class="text-lg flex items-start"><strong class="w-24 font-semibold">Dirección:</strong> <span>C. Miguel Andres Abreu, esq. C. 27 de Febrero, Constanza</span></p>
-                        <p class="text-lg flex items-start"><strong class="w-24 font-semibold">Teléfono:</strong> <a href="tel:8095554711" class="hover:text-[var(--color-primary)]">809-555-4711</a></p>
-                        <p class="text-lg flex items-start"><strong class="w-24 font-semibold">Horario:</strong> <span>Lun - Dom: 12pm - 12am</span></p>
+                <!-- Opciones de Guarnición -->
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold mb-3">Elige tu guarnición</h3>
+                    <div class="space-y-2">
+                        <label class="block bg-gray-100 p-3 rounded-lg"><input type="radio" name="guarnicion" value="Arroz Blanco" class="mr-2" checked>Arroz Blanco</label>
+                        <label class="block bg-gray-100 p-3 rounded-lg"><input type="radio" name="guarnicion" value="Puré de Papas" class="mr-2">Puré de Papas</label>
+                        <label class="block bg-gray-100 p-3 rounded-lg"><input type="radio" name="guarnicion" value="Ensalada Fresca" class="mr-2">Ensalada Fresca</label>
                     </div>
                 </div>
-                <!-- Mapa -->
-                <div class="h-96 md:h-full w-full rounded-2xl overflow-hidden shadow-lg">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3774.223393933544!2d-70.7431111850953!3d18.92198098717704!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8eb13e432c7b5555%3A0x5b3b5b3b5b3b5b3b!2sLa%20Esquina%20RD!5e0!3m2!1sen!2sdo!4v1678886400000!5m2!1sen!2sdo" 
-                        width="100%" 
-                        height="100%" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+
+                <!-- Comentario para el plato -->
+                <div class="mb-8">
+                    <label for="meat-item-comment" class="block text-xl font-bold mb-3">Comentario para este plato</label>
+                    <textarea id="meat-item-comment" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]" rows="2" placeholder="Ej: Sin sal, extra chimichurri..."></textarea>
                 </div>
-            </div>
+
+                <button type="submit" class="block w-full text-center bg-[var(--color-primary)] text-white py-4 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors text-lg">Confirmar y Añadir</button>
+            </form>
         </div>
-    </section>
+    </div>
+
 
     <!-- Footer -->
     <footer class="bg-[var(--color-secondary)] text-white py-12">
-        <div class="container mx-auto px-6 text-center">
-            <p class="font-display text-3xl mb-4">La Esquina RD</p>
-            <div class="flex justify-center space-x-6 mb-6">
-                <!-- Enlace a Instagram -->
-                <a href="https://instagram.com/laesquinard" target="_blank" class="hover:opacity-80 transition-opacity">
-                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M12.315 2c-4.01.083-5.555.594-6.383 1.157-.828.563-1.472 1.206-2.035 2.035C3.333 6.02 2.823 7.565 2.74 11.575c-.083 4.01.428 5.555 1.01 6.383.563.828 1.207 1.472 2.035 2.035.828.563 2.373 1.073 6.383 1.01 4.01-.063 5.555-.573 6.383-1.01.828-.563 1.472-1.207 2.035-2.035.583-.828 1.093-2.373 1.01-6.383-.083-4.01-.594-5.555-1.157-6.383-.563-.828-1.206-1.472-2.035-2.035C17.87 2.823 16.325 2.313 12.315 2zM12 7.045c-2.76 0-4.995 2.235-4.995 4.995S9.24 17.035 12 17.035s4.995-2.235 4.995-4.995S14.76 7.045 12 7.045zm0 8.21c-1.775 0-3.215-1.44-3.215-3.215S10.225 8.83 12 8.83s3.215 1.44 3.215 3.215-1.44 3.215-3.215 3.215zm4.905-8.835a1.18 1.18 0 100-2.36 1.18 1.18 0 000 2.36z" clip-rule="evenodd" />
-                    </svg>
-                </a>
-                <!-- Enlace a WhatsApp -->
-                <a href="https://wa.me/18095554711" target="_blank" class="hover:opacity-80 transition-opacity">
-                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.94L2 22l5.25-1.38c1.41.79 3.02 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.51 7.31c.24-.03.49-.05.73-.05.4 0 .8.07 1.18.21.38.14.61.43.69.73.08.3.09.64.03.97-.06.33-.2.63-.4.88-.2.25-.43.48-.69.69-.26.21-.55.39-.86.53-.31.14-.64.23-.98.26-1.38.12-2.58-.39-3.53-1.34s-1.46-2.15-1.34-3.53c.03-.34.12-.67.26-.98.14-.31.32-.6.53-.86.21-.26.43-.49.69-.69.25-.2.55-.34.88-.4.33-.06.67-.05.97.03.3.08.59.31.73.69.14.38.21.78.21 1.18 0 .24-.02.49-.05.73l-1.5 3.61c-.1.24-.25.46-.44.62-.19.16-.42.27-.67.31-.25.04-.51.02-.75-.05s-.47-.2-.66-.37c-.19-.17-.35-.38-.47-.61-.12-.23-.2-.48-.22-.74l.01-1.25c.01-.5.21-.98.57-1.34s.84-.56 1.34-.57l1.25-.01c.26-.02.51-.1.74-.22.23-.12.44-.28.61-.47.17-.19.32-.42.37-.66s.09-.5.05-.75c-.04-.25-.15-.48-.31-.67-.16-.19-.38-.34-.62-.44l-3.61-1.5z" />
-                    </svg>
-                </a>
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
+                <!-- Columna 1: Logo y Redes -->
+                <div>
+                    <h3 class="font-display text-3xl mb-4">La Esquina RD</h3>
+                    <div class="flex justify-center md:justify-start space-x-4">
+                        <a href="https://instagram.com/laesquinard" target="_blank" class="hover:opacity-80 transition-opacity">
+                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c-4.01.083-5.555.594-6.383 1.157-.828.563-1.472 1.206-2.035 2.035C3.333 6.02 2.823 7.565 2.74 11.575c-.083 4.01.428 5.555 1.01 6.383.563.828 1.207 1.472 2.035 2.035.828.563 2.373 1.073 6.383 1.01 4.01-.063 5.555-.573 6.383-1.01.828-.563 1.472-1.207 2.035-2.035.583-.828 1.093-2.373 1.01-6.383-.083-4.01-.594-5.555-1.157-6.383-.563-.828-1.206-1.472-2.035-2.035C17.87 2.823 16.325 2.313 12.315 2zM12 7.045c-2.76 0-4.995 2.235-4.995 4.995S9.24 17.035 12 17.035s4.995-2.235 4.995-4.995S14.76 7.045 12 7.045zm0 8.21c-1.775 0-3.215-1.44-3.215-3.215S10.225 8.83 12 8.83s3.215 1.44 3.215 3.215-1.44 3.215-3.215 3.215zm4.905-8.835a1.18 1.18 0 100-2.36 1.18 1.18 0 000 2.36z" clip-rule="evenodd" /></svg>
+                        </a>
+                        <a href="https://wa.me/18095391711" target="_blank" class="hover:opacity-80 transition-opacity">
+                            <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.94L2 22l5.25-1.38c1.41.79 3.02 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.51 7.31c.24-.03.49-.05.73-.05.4 0 .8.07 1.18.21.38.14.61.43.69.73.08.3.09.64.03.97-.06.33-.2.63-.4.88-.2.25-.43.48-.69.69-.26.21-.55.39-.86.53-.31.14-.64.23-.98.26-1.38.12-2.58-.39-3.53-1.34s-1.46-2.15-1.34-3.53c.03-.34.12-.67.26-.98.14-.31.32-.6.53-.86.21-.26.43-.49.69-.69.25-.2.55-.34.88-.4.33-.06.67-.05.97.03.3.08.59.31.73.69.14.38.21.78.21 1.18 0 .24-.02.49-.05.73l-1.5 3.61c-.1.24-.25.46-.44.62-.19.16-.42.27-.67.31-.25.04-.51.02-.75-.05s-.47-.2-.66-.37c-.19-.17-.35-.38-.47-.61-.12-.23-.2-.48-.22-.74l.01-1.25c.01-.5.21-.98.57-1.34s.84-.56 1.34-.57l1.25-.01c.26-.02.51-.1.74-.22.23-.12.44-.28.61-.47.17-.19.32-.42.37-.66s.09-.5.05-.75c-.04-.25-.15-.48-.31-.67-.16-.19-.38-.34-.62-.44l-3.61-1.5z" /></svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- Columna 2: Ubicación -->
+                <div>
+                    <h3 class="text-xl font-bold mb-3">Ubicación</h3>
+                    <p class="text-gray-300">C. Miguel Andres Abreu, esq. C. 27 de Febrero, Constanza, La Vega</p>
+                </div>
+                <!-- Columna 3: Horarios -->
+                <div>
+                    <h3 class="text-xl font-bold mb-3">Horarios</h3>
+                    <p class="text-gray-300">Lunes a Domingo</p>
+                    <p class="text-gray-300">12:00 PM - 12:00 AM</p>
+                </div>
             </div>
-            <p>&copy; 2024. Todos los derechos reservados.</p>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2024. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 
@@ -224,22 +303,381 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Lógica para las animaciones de scroll
+        // Lógica para animaciones de entrada al hacer scroll
         const revealElements = document.querySelectorAll('.reveal');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
-                    // Opcional: dejar de observar el elemento una vez que es visible
-                    // observer.unobserve(entry.target);
                 }
             });
-        }, {
-            threshold: 0.1 // El elemento se revela cuando el 10% es visible
-        });
+        }, { threshold: 0.1 });
+        revealElements.forEach(el => observer.observe(el));
 
-        revealElements.forEach(element => {
-            observer.observe(element);
+        // ==================================================
+        // LÓGICA DEL CARRITO DE COMPRAS Y MENÚ DINÁMICO
+        // ==================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Base de datos de todos los platos ---
+            const almuerzoMenuData = {
+                arroces: [
+                    { name: 'Paella Marinera', price: 850 },
+                    { name: 'Paella Valenciana', price: 800 },
+                    { name: 'Arroz con vegetales', price: 450 }
+                ],
+                platosFuertes: [
+                    { name: 'Costillitas St. Louis', price: 650 },
+                    { name: 'Pechugas Napolitanas', price: 550 },
+                    { name: 'Pechugas (plancha/ajillo/crema)', price: 500 },
+                    { name: 'Pastelón de plátanos maduros', price: 480 },
+                    { name: 'Lasagna de carne y queso', price: 520 }
+                ],
+                entradas: [
+                    { name: 'Rollitos de berenjena trufados', price: 350 },
+                    { name: 'Ensalada verde fresca', price: 250 }
+                ],
+                postres: [
+                    { name: 'Brownies', price: 90 },
+                    { name: 'Brownies a la Mode', price: 225 },
+                    { name: 'Tarta Vasca', price: 195 }
+                ]
+            };
+
+            const cenaMenuData = {
+                pastas: [
+                    { name: 'Pasta Pomodoro', price: 250 },
+                    { name: 'Pasta Bechamel', price: 250 },
+                    { name: 'Pasta de Pollo', price: 400 },
+                    { name: 'Pasta de Camarones', price: 550 },
+                    { name: 'Boloñesa', price: 450 }
+                ],
+                hamburguesas: [
+                    { name: 'Angus 8 onzas', price: 390 },
+                    { name: 'Angus Bacon & Cheese', price: 450 },
+                    { name: 'Doble Angus Cheese', price: 800 },
+                    { name: 'Mar & Tierra', price: 650 },
+                    { name: 'Pollo', price: 350 }
+                ],
+                ensaladas: [
+                    { name: 'Ensalada de Pollo', price: 350 },
+                    { name: 'Tortilla Española', price: 300 },
+                    { name: 'Wraps Angus', price: 350 },
+                    { name: 'Wraps Pollo', price: 350 },
+                    { name: 'Wraps de Camarones', price: 450 },
+                    { name: 'Wraps de Vegetales', price: 250 }
+                ],
+                mofongos: [
+                    { name: 'Mofongo', price: 390 },
+                    { name: 'Mofongo Mixto', price: 490 },
+                    { name: 'Mofongo de Camarones', price: 750 }
+                ],
+                caldos: [
+                    { name: 'Crema de Auyama', price: 220 }
+                ],
+                entradas: [
+                    { name: 'Patatas Bravas', price: 220 },
+                    { name: 'Servicio Croquetas Duende', price: 180 },
+                    { name: 'Servicio Croquetas Chorizo', price: 180 },
+                    { name: 'Servicio Croquetas Pollo', price: 180 },
+                    { name: 'Servicio Bastones de Mozzarella', price: 180 },
+                    { name: 'Lomo de cerdo a la sal', price: 195 }
+                ],
+                angus: [
+                    { name: 'Churrasco', price: 990 },
+                    { name: 'Flap Meat 8 - 10 oz', price: 750 },
+                    { name: 'Picaña Angus 16 - 18 onzas', price: 1100 }
+                ],
+                grill: [
+                    { name: 'Pechuga a la Cordon Bleu', price: 590 },
+                    { name: 'Chuletas a la Parrilla', price: 390 },
+                    { name: 'Filete de Cerdo', price: 500 },
+                    { name: 'Parrillada Mixta (2 pers.)', price: 950 }
+                ],
+                embutidos: [
+                    { name: 'Tabla de Queso Manchego', price: 250 },
+                    { name: 'Tabla de Jamón Serrano', price: 290 },
+                    { name: 'Tabla de Embutidos', price: 305 },
+                    { name: 'Provoleta', price: 275 }
+                ],
+                 postres: [
+                    { name: 'Cortado de leche', price: 160 }
+                ],
+            };
+            
+            const acompañamientosData = {
+                acompanamientos: [
+                    { name: 'Arroz Blanco & Habichuelas', price: 0 },
+                    { name: 'Pan Fresco', price: 0 },
+                    { name: 'Casabe', price: 0 },
+                    { name: 'Tostones', price: 0 },
+                    { name: 'Papas Wedge', price: 75 },
+                    { name: 'Papas Fritas', price: 0 },
+                    { name: 'Papas Salteadas', price: 110 },
+                    { name: 'Pure de Papas', price: 90 },
+                    { name: 'Pure de Rabanos', price: 120 },
+                    { name: 'Vegetales al Grill', price: 120 },
+                    { name: 'Bastones de Yuca', price: 75 }
+                ]
+            };
+
+
+            const meatCategories = ['angus', 'grill', 'platosFuertes'];
+            let cart = [];
+            let currentItemForOptions = null;
+
+            const cartButton = document.getElementById('cart-button');
+            const cartCount = document.getElementById('cart-count');
+            const cartModalOverlay = document.getElementById('cart-modal-overlay');
+            const closeCartModalButton = document.getElementById('close-cart-modal');
+            const optionsModalOverlay = document.getElementById('options-modal-overlay');
+            const closeOptionsModalButton = document.getElementById('close-options-modal');
+            const meatOptionsForm = document.getElementById('meat-options-form');
+            const orderComment = document.getElementById('order-comment');
+            const menuGrid = document.getElementById('menu-grid');
+            const menuTitle = document.getElementById('menu-title');
+            const menuAnchors = document.getElementById('menu-anchors');
+            const scrollLeftBtn = document.getElementById('scroll-left');
+            const scrollRightBtn = document.getElementById('scroll-right');
+
+            // --- Lógica para determinar el menú según la hora ---
+            const getCurrentMenu = () => {
+                const currentHour = new Date().getHours();
+                // Horario de almuerzo: 12:00 (12) a 16:59 (4:59 PM)
+                if (currentHour >= 12 && currentHour < 17) {
+                    menuTitle.textContent = "Menú de Almuerzo";
+                    return { ...almuerzoMenuData, ...acompañamientosData };
+                }
+                // Horario de cena: 17:00 (5 PM) en adelante
+                menuTitle.textContent = "Menú de Cena";
+                return { ...cenaMenuData, ...acompañamientosData };
+            };
+
+            const renderMenu = () => {
+                const activeMenu = getCurrentMenu();
+                menuGrid.innerHTML = ''; // Limpiar el menú existente
+                menuAnchors.innerHTML = ''; // Limpiar los anclajes existentes
+
+                let delay = 0;
+                for (const category in activeMenu) {
+                    // --- Crear y añadir el botón de ancla ---
+                    const anchorButton = document.createElement('a');
+                    anchorButton.href = `#category-${category}`;
+                    anchorButton.className = "flex-shrink-0 bg-white shadow-sm hover:bg-[var(--color-primary)] hover:text-white transition-colors duration-300 text-gray-800 font-semibold py-3 px-6 rounded-full text-base";
+                    anchorButton.textContent = category.charAt(0).toUpperCase() + category.slice(1).replace(/([A-Z])/g, ' $1');
+                    menuAnchors.appendChild(anchorButton);
+
+                    // --- Crear la sección de la categoría ---
+                    const categoryContainer = document.createElement('div');
+                    categoryContainer.className = 'reveal space-y-6';
+                    categoryContainer.style.transitionDelay = `${delay}s`;
+                    categoryContainer.id = `category-${category}`; // ID para el ancla
+
+                    // Crear el título de la categoría
+                    const categoryTitle = document.createElement('h3');
+                    categoryTitle.className = 'text-3xl font-bold font-display text-[var(--color-primary)] border-b-2 border-[var(--color-primary)] pb-3 mb-6';
+                    categoryTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1).replace(/([A-Z])/g, ' $1');
+
+                    // Crear el contenedor para los platos
+                    const itemsContainer = document.createElement('div');
+                    itemsContainer.className = 'space-y-6';
+                    itemsContainer.innerHTML = activeMenu[category].map(item => menuItem(item, category)).join('');
+                    
+                    categoryContainer.appendChild(categoryTitle);
+                    categoryContainer.appendChild(itemsContainer);
+                    menuGrid.appendChild(categoryContainer);
+
+                    delay += 0.1;
+                }
+                 // Volver a inicializar los observadores para las nuevas animaciones
+                const newRevealElements = document.querySelectorAll('.reveal');
+                newRevealElements.forEach(el => observer.observe(el));
+                checkScroll(); // Comprobar si las flechas son necesarias
+            };
+
+            const menuItem = (item, category) => `
+                <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm">
+                    <div>
+                        <p class="font-bold text-lg">${item.name}</p>
+                        <p class="font-semibold text-lg" style="color: var(--color-secondary);">RD$${item.price}</p>
+                    </div>
+                    <button class="add-to-cart-btn bg-[var(--color-primary)] text-white rounded-full w-12 h-12 text-2xl font-bold hover:bg-[var(--color-secondary)] transition-all duration-300 flex items-center justify-center" 
+                            data-name="${item.name}" 
+                            data-price="${item.price}"
+                            data-category="${category}">
+                        +
+                    </button>
+                </div>
+            `;
+
+            const addToCart = (name, price) => {
+                const existingItem = cart.find(item => item.name === name);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({ name, price, quantity: 1 });
+                }
+                updateCartUI();
+                cartButton.classList.remove('shake');
+                cartCount.classList.remove('bounce');
+                void cartButton.offsetWidth;
+                void cartCount.offsetWidth;
+                cartButton.classList.add('shake');
+                cartCount.classList.add('bounce');
+            };
+            
+            const renderCart = () => {
+                const cartItemsContainer = document.getElementById('cart-items');
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = '<p class="text-gray-500">Tu carrito está vacío.</p>';
+                    return;
+                }
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-sm text-gray-600">RD$${item.price} x ${item.quantity}</p>
+                        </div>
+                        <div class="font-bold text-lg">RD$${(item.price * item.quantity).toFixed(2)}</div>
+                    </div>
+                `).join('');
+            };
+
+            const updateCartUI = () => {
+                renderCart();
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const tax = subtotal * 0.18;
+                const finalTotal = subtotal + tax;
+
+                document.getElementById('cart-subtotal').textContent = `RD$${subtotal.toFixed(2)}`;
+                document.getElementById('cart-tax').textContent = `RD$${tax.toFixed(2)}`;
+                document.getElementById('cart-total').textContent = `RD$${finalTotal.toFixed(2)}`;
+                
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCount.textContent = totalItems;
+                generateWhatsAppLink();
+            };
+
+            const generateWhatsAppLink = () => {
+                if (cart.length === 0) return;
+                const phoneNumber = "18095391711";
+                let message = "¡Hola! Quisiera hacer el siguiente pedido:\n\n";
+                cart.forEach(item => {
+                    message += `*${item.quantity}x* - ${item.name}\n`;
+                });
+                
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const tax = subtotal * 0.18;
+                const finalTotal = subtotal + tax;
+
+                message += `\n--------------------`;
+                message += `\n*Subtotal: RD$${subtotal.toFixed(2)}*`;
+                message += `\n*ITBIS (18%): RD$${tax.toFixed(2)}*`;
+                message += `\n*Total a pagar: RD$${finalTotal.toFixed(2)}*`;
+                
+                const comment = orderComment.value.trim();
+                if (comment) {
+                    message += `\n\n*Comentario General:* ${comment}`;
+                }
+
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                document.getElementById('whatsapp-checkout').href = whatsappUrl;
+            };
+
+            document.querySelector('main').addEventListener('click', (e) => {
+                const button = e.target.closest('.add-to-cart-btn');
+                if (!button) return;
+
+                const name = button.dataset.name;
+                const price = parseInt(button.dataset.price);
+                const category = button.dataset.category;
+
+                if (meatCategories.includes(category)) {
+                    currentItemForOptions = { name, price, button };
+                    optionsModalOverlay.classList.add('active');
+                } else {
+                    addToCart(name, price);
+                    // Animación de feedback en el botón
+                    button.classList.add('added');
+                    button.innerHTML = '<i class="fas fa-check pointer-events-none"></i>';
+                    setTimeout(() => {
+                        button.classList.remove('added');
+                        button.innerHTML = '+';
+                    }, 1000);
+                }
+            });
+            
+            meatOptionsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(meatOptionsForm);
+                const termino = formData.get('termino');
+                const guarnicion = formData.get('guarnicion');
+                const itemComment = document.getElementById('meat-item-comment').value.trim();
+                
+                const { name, price, button } = currentItemForOptions;
+                let customizedName = `${name} (${termino}, con ${guarnicion})`;
+                
+                if (itemComment) {
+                    customizedName += ` - (${itemComment})`;
+                }
+                
+                addToCart(customizedName, price);
+                
+                // Animación de feedback en el botón
+                button.classList.add('added');
+                button.innerHTML = '<i class="fas fa-check pointer-events-none"></i>';
+                setTimeout(() => {
+                    button.classList.remove('added');
+                    button.innerHTML = '+';
+                }, 1000);
+
+                optionsModalOverlay.classList.remove('active');
+                meatOptionsForm.reset(); // Limpia el formulario para la próxima vez
+                currentItemForOptions = null;
+            });
+
+            // Lógica para abrir y cerrar modales
+            cartButton.addEventListener('click', () => {
+                cartModalOverlay.classList.add('active');
+                generateWhatsAppLink(); // Asegurarse de que el link esté actualizado al abrir
+            });
+            closeCartModalButton.addEventListener('click', () => cartModalOverlay.classList.remove('active'));
+            cartModalOverlay.addEventListener('click', (e) => {
+                if (e.target === cartModalOverlay) cartModalOverlay.classList.remove('active');
+            });
+
+            closeOptionsModalButton.addEventListener('click', () => {
+                optionsModalOverlay.classList.remove('active');
+                meatOptionsForm.reset(); // Limpia el formulario si se cierra sin confirmar
+            });
+            optionsModalOverlay.addEventListener('click', (e) => {
+                if (e.target === optionsModalOverlay) {
+                    optionsModalOverlay.classList.remove('active');
+                    meatOptionsForm.reset(); // Limpia el formulario si se cierra sin confirmar
+                }
+            });
+
+            // Actualizar el link de WhatsApp cuando se escribe un comentario
+            orderComment.addEventListener('input', generateWhatsAppLink);
+            
+            // --- Lógica para las flechas de scroll del menú ---
+            const checkScroll = () => {
+                const { scrollLeft, scrollWidth, clientWidth } = menuAnchors;
+                scrollLeftBtn.style.display = scrollLeft > 0 ? 'flex' : 'none';
+                scrollRightBtn.style.display = scrollLeft < scrollWidth - clientWidth - 1 ? 'flex' : 'none';
+            };
+
+            scrollLeftBtn.addEventListener('click', () => {
+                menuAnchors.scrollBy({ left: -250, behavior: 'smooth' });
+            });
+            scrollRightBtn.addEventListener('click', () => {
+                menuAnchors.scrollBy({ left: 250, behavior: 'smooth' });
+            });
+            menuAnchors.addEventListener('scroll', checkScroll);
+            window.addEventListener('resize', checkScroll); // Comprobar al cambiar tamaño de ventana
+
+            // Renderizar el menú inicial según la hora
+            renderMenu();
         });
     </script>
 
