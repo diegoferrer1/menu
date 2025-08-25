@@ -768,7 +768,6 @@
             selectLocationBtn.addEventListener('click', () => {
                 locationModalOverlay.classList.add('active');
             
-                // Solicitar la ubicación del usuario SOLO cuando se hace clic en el botón.
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
@@ -785,6 +784,11 @@
                         },
                         (error) => {
                             console.warn(`Error de geolocalización (${error.code}): ${error.message}`);
+                        },
+                        {
+                            enableHighAccuracy: false, // Prioriza velocidad sobre precisión
+                            timeout: 10000, // Tiempo de espera de 10 segundos
+                            maximumAge: 0 // No usar una ubicación en caché
                         }
                     );
                 } else {
@@ -798,9 +802,6 @@
             };
 
             closeLocationModalBtn.addEventListener('click', closeLocationModal);
-            locationModalOverlay.addEventListener('click', (e) => {
-                if (e.target === locationModalOverlay) closeLocationModal();
-            });
             
             confirmLocationBtn.addEventListener('click', () => {
                 const typedAddress = addressInput.value.trim();
