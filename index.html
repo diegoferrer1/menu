@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- IMPORTANTE: Para que el mapa funcione, debes reemplazar 'TU_API_KEY_AQUI' con tu propia clave de API de Google Maps. -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUNTpFKdTVDC2N-G1tqP377kWr2iddpA4&callback=initMap" async defer></script>
 
     <style>
         /* Definición de la paleta de colores de la marca y estilos base */
@@ -76,6 +79,21 @@
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
+
+        /* --- ESTILOS PARA MODAL DE UBICACIÓN A PANTALLA COMPLETA --- */
+        #location-modal-overlay .modal-content {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        #location-modal-overlay #map {
+            flex-grow: 1; /* Hace que el mapa ocupe el espacio disponible */
+        }
+
 
         /* Keyframes para animaciones del carrito */
         @keyframes shake {
@@ -195,6 +213,19 @@
                     <label for="order-comment" class="block text-sm font-bold mb-2">Añadir un comentario general (opcional):</label>
                     <textarea id="order-comment" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]" rows="2" placeholder="Ej: Todo para llevar..."></textarea>
                 </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-bold mb-2">Ubicación para Delivery:</label>
+                    <!-- BOTÓN DE UBICACIÓN MEJORADO -->
+                    <button type="button" id="select-location-btn" class="w-full flex items-center justify-center gap-3 p-3 border-2 border-[var(--color-primary)] text-[var(--color-primary)] rounded-full font-semibold hover:bg-[var(--color-primary)] hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Seleccionar en el mapa</span>
+                    </button>
+                    <p id="location-status" class="text-xs text-gray-500 mt-1 text-center">Aún no has seleccionado una ubicación.</p>
+                </div>
                 
                 <!-- Desglose de precios -->
                 <div class="space-y-2 mb-4">
@@ -212,9 +243,14 @@
                     <span>Total:</span>
                     <span id="cart-total" class="text-[var(--color-secondary)]">RD$0.00</span>
                 </div>
-                <a id="whatsapp-checkout" href="#" target="_blank" class="block w-full text-center bg-green-500 text-white py-4 rounded-full font-semibold hover:bg-green-600 transition-colors text-lg">
-                    <i class="fab fa-whatsapp mr-2"></i>Finalizar por WhatsApp
-                </a>
+                <div class="space-y-3">
+                    <a id="whatsapp-checkout" href="#" target="_blank" class="block w-full text-center bg-green-500 text-white py-4 rounded-full font-semibold hover:bg-green-600 transition-colors text-lg">
+                        <i class="fab fa-whatsapp mr-2"></i>Finalizar por WhatsApp
+                    </a>
+                    <button id="clear-cart-button" class="block w-full text-center bg-red-600 text-white py-3 rounded-full font-semibold hover:bg-red-700 transition-colors text-md">
+                        <i class="fas fa-trash mr-2"></i>Limpiar Carrito
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -260,6 +296,30 @@
         </div>
     </div>
 
+    <!-- ========== MODAL DE UBICACIÓN (PANTALLA COMPLETA) ========== -->
+    <div id="location-modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h2 class="text-2xl md:text-3xl font-display font-bold" style="color: var(--color-secondary);">Selecciona tu ubicación</h2>
+                <button id="close-location-modal" class="text-3xl text-gray-400 hover:text-gray-800 transition-colors">&times;</button>
+            </div>
+            <p class="text-gray-600 mb-4 flex-shrink-0">Arrastra el marcador o escribe tu dirección a continuación.</p>
+            
+            <!-- Mapa -->
+            <div id="map" class="w-full rounded-lg border border-gray-300"></div>
+            
+            <!-- Campo para escribir dirección -->
+            <div class="mt-4 flex-shrink-0">
+                 <label for="address-input" class="block text-sm font-bold mb-2">O escribe tu dirección aquí:</label>
+                 <input type="text" id="address-input" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]" placeholder="Ej: Calle Principal #123, Sector Centro">
+            </div>
+
+            <div class="mt-auto pt-4 flex-shrink-0">
+                <button id="confirm-location-btn" class="block w-full text-center bg-[var(--color-primary)] text-white py-4 rounded-full font-semibold hover:bg-[var(--color-secondary)] transition-colors text-lg">Confirmar Ubicación</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Footer -->
     <footer class="bg-[var(--color-secondary)] text-white py-12">
@@ -272,7 +332,7 @@
                         <a href="https://instagram.com/laesquinard" target="_blank" class="hover:opacity-80 transition-opacity">
                             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c-4.01.083-5.555.594-6.383 1.157-.828.563-1.472 1.206-2.035 2.035C3.333 6.02 2.823 7.565 2.74 11.575c-.083 4.01.428 5.555 1.01 6.383.563.828 1.207 1.472 2.035 2.035.828.563 2.373 1.073 6.383 1.01 4.01-.063 5.555-.573 6.383-1.01.828-.563 1.472-1.207 2.035-2.035.583-.828 1.093-2.373 1.01-6.383-.083-4.01-.594-5.555-1.157-6.383-.563-.828-1.206-1.472-2.035-2.035C17.87 2.823 16.325 2.313 12.315 2zM12 7.045c-2.76 0-4.995 2.235-4.995 4.995S9.24 17.035 12 17.035s4.995-2.235 4.995-4.995S14.76 7.045 12 7.045zm0 8.21c-1.775 0-3.215-1.44-3.215-3.215S10.225 8.83 12 8.83s3.215 1.44 3.215 3.215-1.44 3.215-3.215 3.215zm4.905-8.835a1.18 1.18 0 100-2.36 1.18 1.18 0 000 2.36z" clip-rule="evenodd" /></svg>
                         </a>
-                        <a href="https://wa.me/18095391711" target="_blank" class="hover:opacity-80 transition-opacity">
+                        <a href="https://wa.me/18495142209" target="_blank" class="hover:opacity-80 transition-opacity">
                             <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.48 1.32 4.94L2 22l5.25-1.38c1.41.79 3.02 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.51 7.31c.24-.03.49-.05.73-.05.4 0 .8.07 1.18.21.38.14.61.43.69.73.08.3.09.64.03.97-.06.33-.2.63-.4.88-.2.25-.43.48-.69.69-.26.21-.55.39-.86.53-.31.14-.64.23-.98.26-1.38.12-2.58-.39-3.53-1.34s-1.46-2.15-1.34-3.53c.03-.34.12-.67.26-.98.14-.31.32-.6.53-.86.21-.26.43-.49.69-.69.25-.2.55-.34.88-.4.33-.06.67-.05.97.03.3.08.59.31.73.69.14.38.21.78.21 1.18 0 .24-.02.49-.05.73l-1.5 3.61c-.1.24-.25.46-.44.62-.19.16-.42.27-.67.31-.25.04-.51.02-.75-.05s-.47-.2-.66-.37c-.19-.17-.35-.38-.47-.61-.12-.23-.2-.48-.22-.74l.01-1.25c.01-.5.21-.98.57-1.34s.84-.56 1.34-.57l1.25-.01c.26-.02.51-.1.74-.22.23-.12.44-.28.61-.47.17-.19.32-.42.37-.66s.09-.5.05-.75c-.04-.25-.15-.48-.31-.67-.16-.19-.38-.34-.62-.44l-3.61-1.5z" /></svg>
                         </a>
                     </div>
@@ -296,6 +356,36 @@
     </footer>
 
     <script>
+        let map;
+        let marker;
+        let userLocation = null;
+        let deliveryAddress = null; // Variable para guardar la dirección final (texto o link)
+
+        // Se llama cuando se carga el script de Google Maps.
+        // Solo prepara el mapa con una ubicación predeterminada.
+        function initMap() {
+            const defaultLocation = { lat: 18.9085, lng: -70.7441 }; // Constanza
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: defaultLocation,
+            });
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                draggable: true,
+                title: "Arrastra a tu ubicación"
+            });
+
+            // Guardar la posición inicial del marcador
+            const pos = marker.getPosition();
+            userLocation = { lat: pos.lat(), lng: pos.lng() };
+
+            marker.addListener('dragend', () => {
+                const pos = marker.getPosition();
+                userLocation = { lat: pos.lat(), lng: pos.lng() };
+            });
+        }
+
         // Lógica para el menú móvil
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -430,6 +520,7 @@
             const cartCount = document.getElementById('cart-count');
             const cartModalOverlay = document.getElementById('cart-modal-overlay');
             const closeCartModalButton = document.getElementById('close-cart-modal');
+            const clearCartButton = document.getElementById('clear-cart-button');
             const optionsModalOverlay = document.getElementById('options-modal-overlay');
             const closeOptionsModalButton = document.getElementById('close-options-modal');
             const meatOptionsForm = document.getElementById('meat-options-form');
@@ -439,6 +530,11 @@
             const menuAnchors = document.getElementById('menu-anchors');
             const scrollLeftBtn = document.getElementById('scroll-left');
             const scrollRightBtn = document.getElementById('scroll-right');
+            const locationModalOverlay = document.getElementById('location-modal-overlay');
+            const selectLocationBtn = document.getElementById('select-location-btn');
+            const closeLocationModalBtn = document.getElementById('close-location-modal');
+            const confirmLocationBtn = document.getElementById('confirm-location-btn');
+            const addressInput = document.getElementById('address-input');
 
             // --- Lógica para determinar el menú según la hora ---
             const getCurrentMenu = () => {
@@ -526,6 +622,11 @@
                 cartCount.classList.add('bounce');
             };
             
+            const clearCart = () => {
+                cart = [];
+                updateCartUI();
+            };
+
             const renderCart = () => {
                 const cartItemsContainer = document.getElementById('cart-items');
                 if (cart.length === 0) {
@@ -560,7 +661,7 @@
 
             const generateWhatsAppLink = () => {
                 if (cart.length === 0) return;
-                const phoneNumber = "18095391711";
+                const phoneNumber = "18495142209";
                 let message = "¡Hola! Quisiera hacer el siguiente pedido:\n\n";
                 cart.forEach(item => {
                     message += `*${item.quantity}x* - ${item.name}\n`;
@@ -575,6 +676,10 @@
                 message += `\n*ITBIS (18%): RD$${tax.toFixed(2)}*`;
                 message += `\n*Total a pagar: RD$${finalTotal.toFixed(2)}*`;
                 
+                if (deliveryAddress) {
+                    message += `\n\n*Ubicación de Entrega:* ${deliveryAddress}`;
+                }
+
                 const comment = orderComment.value.trim();
                 if (comment) {
                     message += `\n\n*Comentario General:* ${comment}`;
@@ -645,6 +750,8 @@
             cartModalOverlay.addEventListener('click', (e) => {
                 if (e.target === cartModalOverlay) cartModalOverlay.classList.remove('active');
             });
+            
+            clearCartButton.addEventListener('click', clearCart);
 
             closeOptionsModalButton.addEventListener('click', () => {
                 optionsModalOverlay.classList.remove('active');
@@ -655,6 +762,74 @@
                     optionsModalOverlay.classList.remove('active');
                     meatOptionsForm.reset(); // Limpia el formulario si se cierra sin confirmar
                 }
+            });
+
+            // --- LÓGICA DE UBICACIÓN ACTUALIZADA ---
+            selectLocationBtn.addEventListener('click', () => {
+                locationModalOverlay.classList.add('active');
+            
+                // Solicitar la ubicación del usuario SOLO cuando se hace clic en el botón.
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const currentLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                            };
+                            
+                            if (map && marker) {
+                                map.setCenter(currentLocation);
+                                marker.setPosition(currentLocation);
+                                userLocation = { lat: currentLocation.lat, lng: currentLocation.lng };
+                            }
+                        },
+                        (error) => {
+                            console.warn(`Error de geolocalización (${error.code}): ${error.message}`);
+                        }
+                    );
+                } else {
+                    console.log("Este navegador no soporta geolocalización.");
+                }
+            });
+
+            const closeLocationModal = () => {
+                locationModalOverlay.classList.remove('active');
+                addressInput.value = ''; // Limpiar el campo de texto al cerrar
+            };
+
+            closeLocationModalBtn.addEventListener('click', closeLocationModal);
+            locationModalOverlay.addEventListener('click', (e) => {
+                if (e.target === locationModalOverlay) closeLocationModal();
+            });
+            
+            confirmLocationBtn.addEventListener('click', () => {
+                const typedAddress = addressInput.value.trim();
+
+                if (typedAddress) {
+                    deliveryAddress = typedAddress;
+                    document.getElementById('location-status').textContent = `Dirección: ${typedAddress}`;
+                } else {
+                    // Si no hay texto, usar la ubicación del marcador
+                    const pos = marker.getPosition();
+                    userLocation = { lat: pos.lat(), lng: pos.lng() };
+                    deliveryAddress = `https://www.google.com/maps?q=${userLocation.lat},${userLocation.lng}`;
+                    document.getElementById('location-status').textContent = `Ubicación del mapa guardada.`;
+                }
+                
+                closeLocationModal();
+                
+                const locationBtn = document.getElementById('select-location-btn');
+                const locationStatus = document.getElementById('location-status');
+
+                locationStatus.style.color = 'var(--color-secondary)';
+                locationStatus.style.fontWeight = '600';
+                
+                locationBtn.querySelector('span').textContent = 'Cambiar ubicación';
+
+                locationBtn.classList.remove('text-[var(--color-primary)]', 'border-[var(--color-primary)]', 'hover:bg-[var(--color-primary)]', 'hover:text-white');
+                locationBtn.classList.add('bg-[var(--color-secondary)]', 'text-white', 'border-transparent');
+
+                generateWhatsAppLink();
             });
 
             // Actualizar el link de WhatsApp cuando se escribe un comentario
